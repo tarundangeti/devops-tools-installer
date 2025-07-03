@@ -2,12 +2,14 @@
 
 # install_jenkins.sh
 # Automatically installs Jenkins based on the detected Linux distribution
-# Supports: Ubuntu, Debian, CentOS, RHEL, Amazon Linux
+# Supports: Ubuntu, Debian, CentOS, RHEL, Amazon Linux, Rocky, AlmaLinux
 
 set -e
 
 echo -e "\n[+] Jenkins Installation Script (Auto-detect Linux OS)"
-LOG_FILE="logs/install_jenkins_$(date +%F_%T).log"
+LOG_DIR="logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/install_jenkins_$(date +%F_%T).log"
 
 # Ensure the script is run as root
 if [[ "$EUID" -ne 0 ]]; then
@@ -26,6 +28,7 @@ else
 fi
 
 echo "[+] Detected OS: $OS_ID" | tee -a "$LOG_FILE"
+echo "[DEBUG] OS_ID=$OS_ID, OS_LIKE=$OS_LIKE" | tee -a "$LOG_FILE"
 
 install_jenkins_debian() {
   echo "[+] Installing Jenkins on Debian/Ubuntu..." | tee -a "$LOG_FILE"
@@ -44,17 +47,30 @@ install_jenkins_debian() {
 
 install_jenkins_rhel() {
   echo "[+] Installing Jenkins on RHEL/CentOS/Amazon Linux..." | tee -a "$LOG_FILE"
+
+  # Special handling for Amazon Linux 2
+  if grep -q "Amazon Linux" /etc/os-release; then
+    echo "[+] Detected Amazon Linux - enabling java-openjdk11 via amazon-linux-extras" | tee -a "$LOG_FILE"
+    amazon-linux-extras enable java-openjdk11
+    yum clean metadata
+  fi
+
+  echo "[DEBUG] Installing dependencies..." | tee -a "$LOG_FILE"
   yum install -y java-11-openjdk wget curl
 
+  echo "[DEBUG] Setting up Jenkins repo..." | tee -a "$LOG_FILE"
   wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
   rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
 
-  yum upgrade -y
+  echo "[DEBUG] Installing Jenkins package..." | tee -a "$LOG_FILE"
   yum install -y jenkins
 
+  echo "[DEBUG] Enabling and starting Jenkins service..." | tee -a "$LOG_FILE"
   systemctl enable jenkins
   systemctl start jenkins
 }
+
+echo "[DEBUG] Starting installation for $OS_ID" | tee -a "$LOG_FILE"
 
 # Choose installation path
 case "$OS_ID" in
