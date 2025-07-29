@@ -1,15 +1,16 @@
 #!/bin/bash
-
-# install_jenkins.sh
-# Automatically installs Jenkins based on the detected Linux distribution
-# Supports: Ubuntu, Debian, CentOS, RHEL, Amazon Linux, Rocky, AlmaLinux
+#
+# install_jenkins_latest.sh
+# Installs the latest Jenkins on most Linux systems
 
 set -e
 
-echo -e "\n[+] Jenkins Installation Script (Auto-detect Linux OS)"
 LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/install_jenkins_$(date +%F_%T).log"
+
+echo -e "\n[+] Jenkins Universal Installation Script"
+echo "[i] Logging to $LOG_FILE"
 
 # Ensure the script is run as root
 if [[ "$EUID" -ne 0 ]]; then
@@ -17,68 +18,66 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
-# Detect OS
+# Detect major OS family
 if [ -f /etc/os-release ]; then
   . /etc/os-release
-  OS_ID=$ID
-  OS_LIKE=$ID_LIKE
+  OS_ID=$(echo "$ID" | tr '[:upper:]' '[:lower:]')
 else
   echo "[X] Unable to detect operating system." | tee -a "$LOG_FILE"
   exit 1
 fi
 
 echo "[+] Detected OS: $OS_ID" | tee -a "$LOG_FILE"
-echo "[DEBUG] OS_ID=$OS_ID, OS_LIKE=$OS_LIKE" | tee -a "$LOG_FILE"
 
-install_jenkins_debian() {
-  echo "[+] Installing Jenkins on Debian/Ubuntu..." | tee -a "$LOG_FILE"
-  apt update -y
-  apt install -y openjdk-11-jdk gnupg2 curl wget
+install_debian_like() {
+  echo "[+] Installing Java 11 and dependencies..." | tee -a "$LOG_FILE"
+  apt-get update -y
+  apt-get install -y openjdk-11-jdk gnupg curl wget
 
-  wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -
-  sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+  echo "[+] Adding Jenkins repository..." | tee -a "$LOG_FILE"
+  curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee \
+    /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+  echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+    https://pkg.jenkins.io/debian-stable binary/ | tee \
+    /etc/apt/sources.list.d/jenkins.list > /dev/null
 
-  apt update -y
-  apt install -y jenkins
+  apt-get update -y
+  echo "[+] Installing Jenkins (latest)..." | tee -a "$LOG_FILE"
+  apt-get install -y jenkins
 
   systemctl enable jenkins
-  systemctl start jenkins
+  systemctl restart jenkins
 }
 
-install_jenkins_rhel() {
-  echo "[+] Installing Jenkins on RHEL/CentOS/Amazon Linux..." | tee -a "$LOG_FILE"
-
-  # Special handling for Amazon Linux 2
-  if grep -q "Amazon Linux" /etc/os-release; then
-    echo "[+] Detected Amazon Linux - enabling java-openjdk11 via amazon-linux-extras" | tee -a "$LOG_FILE"
-    amazon-linux-extras enable java-openjdk11
-    yum clean metadata
+install_redhat_like() {
+  PKGM=""
+  if command -v dnf >/dev/null 2>&1; then
+    PKGM=dnf
+  else
+    PKGM=yum
   fi
 
-  echo "[DEBUG] Installing dependencies..." | tee -a "$LOG_FILE"
-  yum install -y java-11-openjdk wget curl
+  echo "[+] Installing Java 11 and dependencies..." | tee -a "$LOG_FILE"
+  $PKGM install -y java-11-openjdk wget curl
 
-  echo "[DEBUG] Setting up Jenkins repo..." | tee -a "$LOG_FILE"
+  echo "[+] Adding Jenkins repository..." | tee -a "$LOG_FILE"
   wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
-  rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+  rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 
-  echo "[DEBUG] Installing Jenkins package..." | tee -a "$LOG_FILE"
-  yum install -y jenkins
+  echo "[+] Installing Jenkins (latest)..." | tee -a "$LOG_FILE"
+  $PKGM install -y jenkins
 
-  echo "[DEBUG] Enabling and starting Jenkins service..." | tee -a "$LOG_FILE"
   systemctl enable jenkins
-  systemctl start jenkins
+  systemctl restart jenkins
 }
 
-echo "[DEBUG] Starting installation for $OS_ID" | tee -a "$LOG_FILE"
-
-# Choose installation path
+# Fedora/RedHat/CentOS/Amazon/Rocky/Alma/Oracle
 case "$OS_ID" in
-  ubuntu|debian)
-    install_jenkins_debian
+  ubuntu|debian|raspbian)
+    install_debian_like
     ;;
-  centos|rhel|amzn|rocky|almalinux)
-    install_jenkins_rhel
+  centos|rhel|amzn|rocky|almalinux|fedora|oracle)
+    install_redhat_like
     ;;
   *)
     echo "[X] Unsupported Linux distribution: $OS_ID" | tee -a "$LOG_FILE"
@@ -86,11 +85,12 @@ case "$OS_ID" in
     ;;
 esac
 
-# Final Status
+# Report Jenkins status
 if systemctl is-active --quiet jenkins; then
-  echo "[✓] Jenkins is installed and running at http://<your-server-ip>:8080" | tee -a "$LOG_FILE"
+  IP=$(hostname -I | awk '{print $1}')
+  echo "[✓] Jenkins is installed and running at: http://$IP:8080" | tee -a "$LOG_FILE"
 else
-  echo "[X] Jenkins installation completed but the service is not running." | tee -a "$LOG_FILE"
+  echo "[X] Jenkins installation finished, but service is NOT running." | tee -a "$LOG_FILE"
 fi
 
 echo "[+] Installation complete. Logs saved to $LOG_FILE"
