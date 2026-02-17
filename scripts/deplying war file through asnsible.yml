@@ -1,0 +1,9 @@
+---
+- name: deploying war to servers
+  hosts: all
+  tasks:
+    - name: deploying war to tomcats
+      copy:
+        src: /var/lib/jenkins/workspace/jenkinsansible/target/task-tracker-1.0.0.war
+        dest: /root/tomcat/webapps/
+
