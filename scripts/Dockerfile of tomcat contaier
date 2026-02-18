@@ -1,0 +1,18 @@
+#Use the Offical Tomcat image as the base
+FROM tomcat:latest
+
+#Set environment Varabiles
+ENV CATALINA_HOME /usr/local/tomcat
+ENV PATH $CATALINA_HOME/bin:$PATH
+
+# remoing default apps
+RUN rm -rf $CATALINA_HOME/webapps/*
+
+#copy the war file
+COPY jenkins.war $CATALINA_HOME/webapps/jenkins.war
+
+#Exposeing port 8080
+EXPOSE 8080
+
+#START tomcat
+CMD ["catalina.sh","run"]
