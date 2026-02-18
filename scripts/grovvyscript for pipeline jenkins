@@ -1,0 +1,116 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'jdk'
+        maven 'maven'
+        git 'git'
+    }
+
+    environment {
+        APP_NAME = "task-tracker"
+        DEPLOY_PATH = "/opt/tomcat/webapps"
+        DOCKER_IMAGE = "task-tracker:latest"
+    }
+
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git Branch')
+        booleanParam(name: 'DEPLOY', defaultValue: true, description: 'Deploy Application?')
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo "Cloning Repository..."
+                git branch: "${params.BRANCH_NAME}",
+                    url: 'https://github.com/tarundangeti/Task-track.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo "Building Application..."
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('Unit Test') {
+            steps {
+                echo "Running Tests..."
+                sh 'mvn test'
+            }
+        }
+
+        stage('Code Quality (SonarQube)') {
+            when {
+                expression { return false }   // enable when sonar is configured
+            }
+            steps {
+                echo "Running Sonar Analysis..."
+                sh 'mvn sonar:sonar'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                echo "Packaging WAR file..."
+                sh 'mvn package'
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.war', fingerprint: true
+            }
+        }
+
+        stage('Docker Build') {
+            when {
+                expression { return false }   // enable if using docker
+            }
+            steps {
+                echo "Building Docker Image..."
+                sh "docker build -t ${DOCKER_IMAGE} ."
+            }
+        }
+
+        stage('Deploy to Tomcat') {
+            when {
+                expression { return params.DEPLOY }
+            }
+            steps {
+                echo "Deploying WAR to Tomcat..."
+                sh "cp target/*.war ${DEPLOY_PATH}"
+            }
+        }
+    }
+
+    post {
+
+        always {
+            echo "Pipeline Finished."
+        }
+
+        success {
+            echo "Build Successful 🎉"
+        }
+
+        failure {
+            echo "Build Failed ❌"
+        }
+
+        unstable {
+            echo "Build Unstable ⚠️"
+        }
+
+        cleanup {
+            cleanWs()
+        }
+    }
+}
