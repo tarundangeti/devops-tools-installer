@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  internetbanking:
+    image: internetbanking:v1
+    ports:
+      - "81:80"
+  mobilebanking:
+    image: mobilebanking:v1
+    ports:
+      - "82:80"
+    insurence:
+    image: insurance:v1
+    ports:
+      - "83:80"
