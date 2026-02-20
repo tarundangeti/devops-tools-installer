@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: webuser
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: webdatabase
+    secrets:
+      - db_password
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+
+secrets:
+  db_password:
+    file: db_password.txt
