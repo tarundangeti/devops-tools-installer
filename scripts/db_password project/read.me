@@ -1,1 +1,23 @@
+to run the project first we need to encript the password with docker
 
+docker secrets create db_password db_password.txt
+
+docker service create --name db_service -p 81:80 --secrets db_password nginx:latest
+
+to check the password in the container
+
+docker exec -it conatinername /bin/bash
+cat /run/secrets/db_password
+
+or 
+
+docker exec -it cat /run/secrets/dbpassword
+
+------------------------------------------------------------------------------
+
+docker secrets create db_password db_password.txt to run with respective to the docker compose file
+
+docker secrets create db_password db_password.txt
+
+docker stack deploy --compose-file docker-compose.yml db_service
+this will start the service along with coping the password
