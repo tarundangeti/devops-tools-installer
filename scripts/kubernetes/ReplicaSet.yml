@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: ReplicaSetPod
+  name: replicapod
   labels:
     app: nginx
 spec:
