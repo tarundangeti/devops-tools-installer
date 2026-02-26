@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: paralleljob
+  labels:
+    app: parallel
+spec:
+  completions: 6
+  parallelism: 2
+  template:
+    metadata:
+      labels:
+        app: parallel
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: busybox
+          image: busybox
+          command: ["sh","-c"," echo hello from buzy box from parallel && sleep 10"]
