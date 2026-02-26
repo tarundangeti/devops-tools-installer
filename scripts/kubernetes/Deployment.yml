@@ -1,20 +1,20 @@
-apiVersion: app/v1
+apiVersion: apps/v1
 kind: Deploy
 metadata:
-  name: Deploypod
+  name: deploypod
   labels:
     app: nginx
 spec:
   replicas: 3
-  selectors:
+  selector:
     matchLabels:
       app: nginx
   template:
     metadata:
       labels:
         app: nginx
-  spec:
-    containers:
-      - name: nginxcont
-        image: nginx
+    spec:
+      containers:
+        - name: nginxcont
+          image: nginx
   
