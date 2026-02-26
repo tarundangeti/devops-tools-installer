@@ -3,16 +3,19 @@ kind: CronJob
 metadata:
   name: cronjob
   labels:
-    app: cornjob
+    app: cronjob
 spec:
   schedule: "*/1 * * * *"
-  template:
-    metadata:
-      labels:
-        app: cronjob
+  jobTemplate:
     spec:
-      conatiners:
-        - name: busybox
-          image: busybox
-          command: ["sh","-c","echo hello from cornJob && sleep 10"]
-      restartPolicy: Never
+      template:
+        metadata:
+          labels:
+            app: cronjob
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: busybox
+              image: busybox
+              command: ["sh","-c","echo hello from cornJob && sleep 10"]
+          
