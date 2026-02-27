@@ -174,19 +174,19 @@ kubectl get nodes -o wide
 ### Edit Cluster
 
 ```bash
-kops edit cluster reyaz.k8s.local
+kops edit cluster tarun.k8s.local
 ```
 
 ### Edit Node Instance Group
 
 ```bash
-kops edit ig --name=reyaz.k8s.local nodes-ap-south-1a
+kops edit ig --name=tarun.k8s.local nodes-ap-south-1a
 ```
 
 ### Edit Control Plane Instance Group
 
 ```bash
-kops edit ig --name=reyaz.k8s.local control-plane-ap-south-1a
+kops edit ig --name=tarun.k8s.local control-plane-ap-south-1a
 ```
 
 ---
@@ -196,7 +196,7 @@ kops edit ig --name=reyaz.k8s.local control-plane-ap-south-1a
 To delete the cluster completely:
 
 ```bash
-kops delete cluster --name reyaz.k8s.local --yes
+kops delete cluster --name tarun.k8s.local --yes
 ```
 
 ---
