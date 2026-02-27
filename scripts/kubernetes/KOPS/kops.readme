@@ -96,19 +96,19 @@ mv kubectl /usr/local/bin/kubectl
 mv kops-linux-amd64 /usr/local/bin/kops
 
 aws s3api create-bucket \
---bucket reyaz-kops-testbkt143333.k8s.local \
+--bucket tarun-kops-testbkt143333.k8s.local \
 --region ap-south-1 \
 --create-bucket-configuration LocationConstraint=ap-south-1
 
 aws s3api put-bucket-versioning \
---bucket reyaz-kops-testbkt143333.k8s.local \
+--bucket tarun-kops-testbkt143333.k8s.local \
 --region ap-south-1 \
 --versioning-configuration Status=Enabled
 
-export KOPS_STATE_STORE=s3://reyaz-kops-testbkt143333.k8s.local
+export KOPS_STATE_STORE=s3://tarun-kops-testbkt143333.k8s.local
 
 kops create cluster \
---name=reyaz.k8s.local \
+--name=tarun.k8s.local \
 --zones=ap-south-1a,ap-south-1b \
 --control-plane-count=1 \
 --control-plane-size=t3.medium \
@@ -121,7 +121,7 @@ kops create cluster \
 --networking=calico \
 --topology=public
 
-kops update cluster --name reyaz.k8s.local --yes --admin
+kops update cluster --name tarun.k8s.local --yes --admin
 ```
 
 Save and exit:
@@ -141,7 +141,7 @@ sh kops.sh
 ## 🌍 Step 5: Export State Store (If Required)
 
 ```bash
-export KOPS_STATE_STORE=s3://reyaz-kops-testbkt143333.k8s.local
+export KOPS_STATE_STORE=s3://tarun-kops-testbkt143333.k8s.local
 ```
 
 ---
@@ -200,6 +200,12 @@ kops delete cluster --name reyaz.k8s.local --yes
 ```
 
 ---
+kops commands
+
+list clusters with: kops get cluster
+edit this cluseter with: kops edit cluster tarun.k8s.local
+edit your node instance group: kops edit ig --name=tarun.k8s.local nodes-ap-south-1a
+edit your master instance group: kops edit ig --name=tarun.k8s.local master-ap-south-1a
 
 ## 🎯 Summary
 
