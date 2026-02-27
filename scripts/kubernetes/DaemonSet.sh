@@ -12,7 +12,7 @@ spec:
     metadata:
       labels:
         app: bank
-  spec:
-    containers:
-      - name: conti1
-        image: tarundangeti/mobilebankingimg
+    spec:
+      containers:
+        - name: conti1
+          image: tarundangeti/mobilebankingimg
