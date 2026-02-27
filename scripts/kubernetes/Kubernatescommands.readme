@@ -392,6 +392,13 @@ Autoscaling:
 ```bash
 kubectl autoscale deployment <deployment-name> --min=2 --max=5 --cpu-percent=80
 ```
+to check the auto scale
+```bash
+kubectl exec -it podname -- /bin/bash
+apt update -y
+apt install stress -y
+stress --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 60s
+```
 
 ---
 
