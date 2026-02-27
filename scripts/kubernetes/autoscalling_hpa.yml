@@ -1,18 +1,12 @@
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoScaler
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
 metadata:
   name: ib-hpa
 spec:
   scaleTargetRef:
-    apiVersion: v1
+    apiVersion: apps/v1
     kind: Deployment
     name: ib-banking
   minReplicas: 2
-  MaxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target: 
-          type: Utilization
-          averageUtilization: 20
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 20
