@@ -1,4 +1,4 @@
-apiVersion: apps/vq
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: mb-daemonset
