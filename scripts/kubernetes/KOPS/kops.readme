@@ -1,1 +1,213 @@
+# 🚀 Kubernetes Cluster Setup using Kops on AWS (Amazon Linux 2023)
 
+This guide explains how to create a Kubernetes cluster on AWS using **kops** from an **Amazon Linux 2023 EC2 instance**.
+
+---
+
+## 📌 Prerequisites
+
+- AWS Account
+- EC2 Instance:
+  - AMI: Amazon Linux 2023
+  - Instance Type: t2.micro
+- IAM Role attached to EC2:
+  - Service: EC2
+  - Permission: AdministratorAccess
+- SSH access to the EC2 instance
+
+---
+
+## 🖥️ Step 1: Launch EC2 Instance
+
+1. Launch an EC2 instance with:
+   - Amazon Linux 2023
+   - t2.micro
+2. Attach IAM Role with AdministratorAccess
+3. SSH into the instance
+
+---
+
+## ⚙️ Step 2: Configure Environment
+
+### Update PATH
+
+```bash
+vi ~/.bashrc
+```
+
+Add the following line:
+
+```bash
+export PATH=$PATH:/usr/local/bin/
+```
+
+Save and exit:
+
+```
+:wq!
+```
+
+Reload the configuration:
+
+```bash
+source ~/.bashrc
+```
+
+---
+
+## 🔑 Step 3: Generate SSH Key for Kops
+
+```bash
+ssh-keygen
+```
+
+Copy public key:
+
+```bash
+cp /root/.ssh/id_rsa.pub my-keypair.pub
+```
+
+Set permissions:
+
+```bash
+chmod 777 my-keypair.pub
+```
+
+---
+
+## 📦 Step 4: Install kubectl and kops
+
+Create a script file:
+
+```bash
+vi kops.sh
+```
+
+Add the following content:
+
+```bash
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+wget https://github.com/kubernetes/kops/releases/download/v1.32.0/kops-linux-amd64
+
+chmod +x kops-linux-amd64 kubectl
+
+mv kubectl /usr/local/bin/kubectl
+mv kops-linux-amd64 /usr/local/bin/kops
+
+aws s3api create-bucket \
+--bucket reyaz-kops-testbkt143333.k8s.local \
+--region ap-south-1 \
+--create-bucket-configuration LocationConstraint=ap-south-1
+
+aws s3api put-bucket-versioning \
+--bucket reyaz-kops-testbkt143333.k8s.local \
+--region ap-south-1 \
+--versioning-configuration Status=Enabled
+
+export KOPS_STATE_STORE=s3://reyaz-kops-testbkt143333.k8s.local
+
+kops create cluster \
+--name=reyaz.k8s.local \
+--zones=ap-south-1a,ap-south-1b \
+--control-plane-count=1 \
+--control-plane-size=t3.medium \
+--node-count=2 \
+--node-size=t3.small \
+--node-volume-size=20 \
+--control-plane-volume-size=20 \
+--ssh-public-key=my-keypair.pub \
+--image=ami-02d26659fd82cf299 \
+--networking=calico \
+--topology=public
+
+kops update cluster --name reyaz.k8s.local --yes --admin
+```
+
+Save and exit:
+
+```
+:wq!
+```
+
+Run the script:
+
+```bash
+sh kops.sh
+```
+
+---
+
+## 🌍 Step 5: Export State Store (If Required)
+
+```bash
+export KOPS_STATE_STORE=s3://reyaz-kops-testbkt143333.k8s.local
+```
+
+---
+
+## ✅ Step 6: Validate Cluster
+
+Wait for the cluster to be ready:
+
+```bash
+kops validate cluster --wait 10m
+```
+
+---
+
+## 🔍 Useful Commands
+
+### List Clusters
+
+```bash
+kops get cluster
+```
+
+### Check Nodes
+
+```bash
+kubectl get nodes
+kubectl get nodes -o wide
+```
+
+### Edit Cluster
+
+```bash
+kops edit cluster reyaz.k8s.local
+```
+
+### Edit Node Instance Group
+
+```bash
+kops edit ig --name=reyaz.k8s.local nodes-ap-south-1a
+```
+
+### Edit Control Plane Instance Group
+
+```bash
+kops edit ig --name=reyaz.k8s.local control-plane-ap-south-1a
+```
+
+---
+
+## 🗑️ Delete Cluster
+
+To delete the cluster completely:
+
+```bash
+kops delete cluster --name reyaz.k8s.local --yes
+```
+
+---
+
+## 🎯 Summary
+
+This README covers:
+
+- Launching Amazon Linux 2023 EC2
+- Installing kubectl and kops
+- Creating S3 bucket for Kops state store
+- Creating Kubernetes cluster
+- Validating cluster
+- Managing and deleting cluster
