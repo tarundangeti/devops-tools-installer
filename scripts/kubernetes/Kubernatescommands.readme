@@ -339,6 +339,7 @@ kubectl describe secret app-secret
 to delete the cluster in the KOPS
 kops delete cluster --name clustername --yes
 
+
 ---
 
 # 🔹 RBAC (Role Based Access Control)
@@ -366,6 +367,11 @@ kubectl get sa
 kubectl auth can-i list pods --namespace=dev --as=tarun
 ```
 
+# 🔹 daemonset
+
+kubectl get ds
+kubectl get ds -o wide
+kubectl delete ds daemonsetname
 ---
 
 # 🔹 Scaling
