@@ -207,6 +207,8 @@ edit this cluseter with: kops edit cluster tarun.k8s.local
 edit your node instance group: kops edit ig --name=tarun.k8s.local nodes-ap-south-1a
 edit your master instance group: kops edit ig --name=tarun.k8s.local master-ap-south-1a
 finally configure your cluster with: kops update cluster --name tarun.k8s.local --yes --admin
+kubectl get nodes
+
 
 ## 🎯 Summary
 
