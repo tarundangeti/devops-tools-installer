@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.i0/v1
+kind: RoleBinding
+metadata:
+  name: read-pods
+  namespace: dev
+subjects:
+  kind: User
+  name: tarun
+  apiGroup: rdac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: dev-pod-reader
+  apiGroup: rbac.authorization.k8s.io
