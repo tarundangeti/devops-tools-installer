@@ -241,6 +241,13 @@ kubectl get svc
 kubectl describe svc <service-name>
 ```
 
+```bash
+kubectl create -f manifestfilename.yml
+```
+```bash
+kubectl delete svc manifestfilename.yml
+```
+
 Expose deployment:
 
 ```bash
