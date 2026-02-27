@@ -4,6 +4,6 @@ metadata:
   namespace: dev
   name: dev-pod-reader
 rules:
--  apigroups: [""]
+-  apiGroups: [""]
    resources: ["pods"]
    verbs: ["get","list","watch"]
