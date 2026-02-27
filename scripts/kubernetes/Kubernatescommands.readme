@@ -322,6 +322,10 @@ List pods in kube-system:
 ```bash
 kubectl get pods -n kube-system
 ```
+# 🔹 resourcequota
+after creating respectivenamespace
+kubectl get quota
+
 
 ---
 
