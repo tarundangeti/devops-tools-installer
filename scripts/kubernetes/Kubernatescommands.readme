@@ -1,20 +1,56 @@
 # 📘 Kubernetes kubectl Command Reference Guide
 
-A structured and professional reference guide for commonly used `kubectl` commands.
+A structured and professional reference guide for commonly used `kubectl` commands.  
+Useful for DevOps Engineers, Kubernetes Administrators, and learners.
 
 ---
 
 ## 📌 Table of Contents
 
+- [Cluster Information](#-cluster-information)
 - [Pod Management](#-pod-management)
 - [Node Management](#-node-management)
 - [Deployment Management](#-deployment-management)
 - [ReplicaSet Management](#-replicaset-management)
+- [Service Management](#-service-management)
 - [Rollout Management](#-rollout-management)
 - [Jobs & CronJobs](#-jobs--cronjobs)
-- [API & Resource Discovery](#-api--resource-discovery)
+- [Namespace Management](#-namespace-management)
+- [ConfigMaps & Secrets](#-configmaps--secrets)
+- [RBAC (Role Based Access Control)](#-rbac-role-based-access-control)
 - [Scaling](#-scaling)
+- [API & Resource Discovery](#-api--resource-discovery)
 - [Useful Flags](#-useful-flags)
+- [Troubleshooting Commands](#-troubleshooting-commands)
+
+---
+
+# 🔹 Cluster Information
+
+```bash
+kubectl cluster-info
+```
+Display cluster master and service endpoints.
+
+```bash
+kubectl version
+```
+Show client and server Kubernetes versions.
+
+```bash
+kubectl config view
+```
+View kubeconfig settings.
+
+```bash
+kubectl config get-contexts
+```
+List available contexts.
+
+```bash
+kubectl config use-context <context-name>
+```
+Switch between clusters.
 
 ---
 
@@ -25,20 +61,25 @@ A structured and professional reference guide for commonly used `kubectl` comman
 ```bash
 kubectl get pods
 ```
-List all pods in the current namespace.
+List pods in current namespace.
+
+```bash
+kubectl get pods -A
+```
+List pods in all namespaces.
 
 ```bash
 kubectl get pods --show-labels
 ```
-List pods along with their labels.
+Display pods with labels.
 
 ```bash
-kubectl get pod -o wide
+kubectl get pods -o wide
 ```
-Display additional details such as Node and Pod IP.
+Show Node name and Pod IP.
 
 ```bash
-kubectl get pod --watch
+kubectl get pods --watch
 ```
 Watch pods in real-time.
 
@@ -49,7 +90,7 @@ Watch pods in real-time.
 ```bash
 kubectl describe pod <pod-name>
 ```
-Display detailed information about a specific pod.
+Detailed pod information including events.
 
 ---
 
@@ -58,26 +99,31 @@ Display detailed information about a specific pod.
 ```bash
 kubectl exec -it <pod-name> -- /bin/bash
 ```
-Access the container shell interactively.
+Access container shell interactively.
+
+If bash is not available:
 
 ```bash
-exit
+kubectl exec -it <pod-name> -- /bin/sh
 ```
-Exit from the container shell.
 
 ---
 
-### View Pod Logs
+### View Logs
 
 ```bash
 kubectl logs <pod-name>
 ```
-View logs of a pod.
+
+```bash
+kubectl logs -f <pod-name>
+```
+Stream logs in real-time.
 
 ```bash
 kubectl logs <pod-name> -c <container-name>
 ```
-View logs of a specific container inside the pod.
+Logs of specific container.
 
 ---
 
@@ -86,16 +132,26 @@ View logs of a specific container inside the pod.
 ```bash
 kubectl delete pod <pod-name>
 ```
-Delete the specified pod.
+
+Force delete:
+
+```bash
+kubectl delete pod <pod-name> --grace-period=0 --force
+```
 
 ---
 
-### Create Pod Using Image
+### Create Pod Quickly
 
 ```bash
-kubectl run <pod-name> --image=<image-name>
+kubectl run nginx --image=nginx
 ```
-Create a pod using the specified container image.
+
+Generate YAML without creating:
+
+```bash
+kubectl run nginx --image=nginx --dry-run=client -o yaml
+```
 
 ---
 
@@ -104,60 +160,62 @@ Create a pod using the specified container image.
 ```bash
 kubectl get nodes
 ```
-List all cluster nodes.
+
+```bash
+kubectl describe node <node-name>
+```
+
+```bash
+kubectl cordon <node-name>
+```
+Mark node unschedulable.
+
+```bash
+kubectl drain <node-name> --ignore-daemonsets
+```
+Safely evict workloads.
+
+```bash
+kubectl uncordon <node-name>
+```
+Make node schedulable again.
 
 ---
 
 # 🔹 Deployment Management
 
-### Create / Apply Deployment
+### Create / Apply
 
 ```bash
-kubectl create -f <manifest-file>.yml
+kubectl create -f app.yml
+kubectl apply -f app.yml
 ```
-Create resources from a YAML file.
-
-```bash
-kubectl apply -f <manifest-file>.yml
-```
-Create or update resources declaratively.
-
----
 
 ### View Deployments
 
 ```bash
 kubectl get deploy
-```
-List all deployments.
-
-```bash
 kubectl get deploy -o wide
-```
-Show detailed deployment information.
-
-```bash
 kubectl get deploy --watch
 ```
-Watch deployments in real-time.
 
----
-
-### Describe Deployment
+### Describe
 
 ```bash
 kubectl describe deploy <deployment-name>
 ```
-Display detailed information about a deployment.
 
----
-
-### Edit Deployment
+### Edit
 
 ```bash
 kubectl edit deploy/<deployment-name>
 ```
-Edit deployment configuration directly.
+
+### Delete
+
+```bash
+kubectl delete deploy <deployment-name>
+```
 
 ---
 
@@ -166,33 +224,49 @@ Edit deployment configuration directly.
 ```bash
 kubectl get rs
 ```
-List ReplicaSets.
+
+```bash
+kubectl describe rs <replicaset-name>
+```
+
+---
+
+# 🔹 Service Management
+
+```bash
+kubectl get svc
+```
+
+```bash
+kubectl describe svc <service-name>
+```
+
+Expose deployment:
+
+```bash
+kubectl expose deploy <deployment-name> --type=NodePort --port=80
+```
 
 ---
 
 # 🔹 Rollout Management
 
 ```bash
+kubectl rollout status deploy/<deployment-name>
+```
+
+```bash
 kubectl rollout history deploy/<deployment-name>
 ```
-Show rollout history.
 
 ```bash
 kubectl rollout undo deploy/<deployment-name>
 ```
-Rollback to the previous revision.
 
 ```bash
 kubectl rollout pause deploy/<deployment-name>
-```
-Pause a rollout.
-
-> ⚠ When paused, rollback (undo) cannot be performed.
-
-```bash
 kubectl rollout resume deploy/<deployment-name>
 ```
-Resume a paused rollout.
 
 ---
 
@@ -200,18 +274,106 @@ Resume a paused rollout.
 
 ```bash
 kubectl get jobs
+kubectl describe job <job-name>
 ```
-List Jobs.
-
-```bash
-kubectl get deploy
-```
-List Deployments.
 
 ```bash
 kubectl get cronjob
+kubectl describe cronjob <cronjob-name>
 ```
-List CronJobs.
+
+Delete job:
+
+```bash
+kubectl delete job <job-name>
+```
+
+---
+
+# 🔹 Namespace Management
+
+```bash
+kubectl get ns
+```
+
+```bash
+kubectl create ns <namespace-name>
+```
+
+```bash
+kubectl delete ns <namespace-name>
+```
+
+Set default namespace:
+
+```bash
+kubectl config set-context --current --namespace=<namespace-name>
+```
+
+List pods in kube-system:
+
+```bash
+kubectl get pods -n kube-system
+```
+
+---
+
+# 🔹 ConfigMaps & Secrets
+
+### ConfigMap
+
+```bash
+kubectl create configmap app-config --from-literal=key=value
+kubectl get configmap
+kubectl describe configmap app-config
+```
+
+### Secret
+
+```bash
+kubectl create secret generic app-secret --from-literal=password=1234
+kubectl get secrets
+kubectl describe secret app-secret
+```
+
+---
+
+# 🔹 RBAC (Role Based Access Control)
+
+Create Role:
+
+```bash
+kubectl create role pod-reader --verb=get,list --resource=pods
+```
+
+Create RoleBinding:
+
+```bash
+kubectl create rolebinding read-pods \
+--role=pod-reader \
+--user=user1
+```
+
+View roles:
+
+```bash
+kubectl get roles
+kubectl get rolebindings
+```
+
+---
+
+# 🔹 Scaling
+
+```bash
+kubectl scale deployment <deployment-name> --replicas=3
+```
+
+Autoscaling:
+
+```bash
+kubectl autoscale deployment <deployment-name> --min=2 --max=5 --cpu-percent=80
+```
 
 ---
 
@@ -219,24 +381,31 @@ List CronJobs.
 
 ```bash
 kubectl api-versions
-```
-Display supported API versions.
-
-```bash
 kubectl api-resources
+kubectl explain pod
+kubectl explain deployment.spec.template
 ```
-List all available resource types.
 
 ---
 
-# 🔹 Scaling
+# 🔹 Troubleshooting Commands
 
 ```bash
-kubectl scale deployment <deployment-name> --replicas=<count>
+kubectl get events
 ```
-Scale a deployment to the specified number of replicas.
 
-> ⚠ Pods cannot be scaled directly. Scale Deployments or ReplicaSets instead.
+Sort by time:
+
+```bash
+kubectl get events --sort-by=.metadata.creationTimestamp
+```
+
+Check resource usage (Metrics Server required):
+
+```bash
+kubectl top nodes
+kubectl top pods
+```
 
 ---
 
@@ -247,16 +416,22 @@ Scale a deployment to the specified number of replicas.
 | `-n <namespace>` | Specify namespace |
 | `-A` | All namespaces |
 | `-o wide` | Extended output |
+| `-o yaml` | Output as YAML |
+| `-o json` | Output as JSON |
 | `--watch` | Real-time updates |
 | `--show-labels` | Show labels |
+| `--dry-run=client` | Test without creating resource |
+| `-f <file>` | Specify manifest file |
 
 ---
 
-## 📝 Notes
+## 📝 Best Practices
 
-- Replace placeholders (`<pod-name>`, `<deployment-name>`, etc.) with actual resource names.
-- Ensure correct namespace if not using the default namespace.
-- Prefer `kubectl apply` for declarative resource management.
+- Prefer `kubectl apply` for declarative management.
+- Use namespaces to isolate environments (dev, qa, prod).
+- Always check events when troubleshooting.
+- Avoid force deleting pods unless necessary.
+- Use RBAC for production-grade access control.
 
 ---
 
