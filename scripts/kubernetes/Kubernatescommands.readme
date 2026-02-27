@@ -359,6 +359,7 @@ View roles:
 ```bash
 kubectl get roles
 kubectl get rolebindings
+kubectl get sa
 kubectl auth can-i list pods --namespace=dev --as=tarun
 ```
 
