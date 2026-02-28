@@ -1,0 +1,119 @@
+# Kubernetes Dashboard Setup Guide
+
+This guide explains how to deploy and access the Kubernetes Dashboard GUI using **NodePort** and **LoadBalancer** services.
+
+---
+
+## 1. Deploy the Kubernetes Dashboard
+
+Apply the official Dashboard manifest:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+This creates the Dashboard deployment and service in the kubernetes-dashboard namespace.
+
+2. Create an Admin Service Account
+By default, the Dashboard has limited permissions. Create an admin account:
+
+yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+Apply it:
+
+bash
+kubectl apply -f dashboard-admin.yaml
+Generate a login token:
+
+bash
+kubectl -n kubernetes-dashboard create token admin-user
+3. Expose the Dashboard
+Option A: NodePort
+Edit the service to use NodePort:
+
+yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+spec:
+  type: NodePort
+  selector:
+    k8s-app: kubernetes-dashboard
+  ports:
+    - port: 443
+      targetPort: 8443
+      protocol: TCP
+      nodePort: 32702
+Apply it:
+
+bash
+kubectl apply -f dashboard-nodeport.yaml
+Check the service:
+
+bash
+kubectl -n kubernetes-dashboard get svc kubernetes-dashboard
+Access the Dashboard:
+
+Code
+https://<node-ip>:32702/
+Option B: LoadBalancer
+For cloud providers (AWS, GCP, Azure) or MetalLB on bare-metal, use LoadBalancer:
+
+yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+spec:
+  type: LoadBalancer
+  selector:
+    k8s-app: kubernetes-dashboard
+  ports:
+    - port: 443
+      targetPort: 8443
+      protocol: TCP
+Apply it:
+
+bash
+kubectl apply -f dashboard-loadbalancer.yaml
+Check the service:
+
+bash
+kubectl -n kubernetes-dashboard get svc kubernetes-dashboard
+Access the Dashboard:
+
+Code
+https://<external-ip>/
+4. Login
+Use the token generated earlier:
+
+bash
+kubectl -n kubernetes-dashboard create token admin-user
+Paste the token into the Dashboard login screen.
+
+5. Security Notes
+Exposing the Dashboard publicly (NodePort or LoadBalancer) can be risky.
+
+Restrict access with firewall rules or security groups.
+
+Use RBAC to limit permissions instead of always using cluster-admin.
+
+For production, consider exposing via Ingress with TLS and authentication.
