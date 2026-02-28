@@ -43,7 +43,10 @@ Generate a login token:
 bash
 kubectl -n kubernetes-dashboard create token admin-user
 3. Expose the Dashboard
+
 Option A: NodePort
+
+kubectl -n kubernetes-dashboard edit service kubernetes-dashboard
 Edit the service to use NodePort:
 
 yaml
@@ -74,6 +77,7 @@ Access the Dashboard:
 Code
 https://<node-ip>:32702/
 Option B: LoadBalancer
+kubectl -n kubernetes-dashboard edit service kubernetes-dashboard
 For cloud providers (AWS, GCP, Azure) or MetalLB on bare-metal, use LoadBalancer:
 
 yaml
