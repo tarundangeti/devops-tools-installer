@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-log-aggregator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-aggregator
+  template:
+    metadata:
+      labels:
+        app: log-aggregator
+    spec:
+      containers:
+        - name: app-container
+          image: alpine
+          command: ["/bin/sh", "-c"]
+          args: ["while true; do date >> /var/log/app.log; sleep 5; done"]
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /var/log
+        - name: sidecont
+          image: nginx
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: shared-logs
+          emptyDir: {}
