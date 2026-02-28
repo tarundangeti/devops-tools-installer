@@ -275,8 +275,6 @@ kubectl rollout pause deploy/<deployment-name>
 kubectl rollout resume deploy/<deployment-name>
 ```
 
----
-
 # 🔹 Jobs & CronJobs
 
 ```bash
@@ -329,22 +327,90 @@ kubectl get quota
 
 ---
 
-# 🔹 ConfigMaps & Secrets
+# 🔹 ConfigMaps & Secrets & setting env
 
 ### ConfigMap
 
 ```bash
+kubectl create deploy newdb --image=mariadb
+
+pod is crashing due to not setting env varables
+
+kubectl set env deploy newdb MYSQL_ROOT_PASSWORD=root1234 --will set poasswor and pod will run
+
+fromenv -- passing env via file
+
+vi vars
+--
+MYSQL_ROOT_PASSWORD=root1234
+MYSQL_ROOT_USER=root
+--
+esc + wq!
+
+kubectl create cm dbvar --from=vars
+
+kubectl create deploy newdb1 --image=mariadb
+
+kubectl set env deploy newdb1 --from-env-file=configmaps/dbvar  --it will pass the env via file
+
+vi  var
+--
+ROOT_PASSWORD=root1234
+ROOT_NAME=root
+--
+esc+wq!
+
+kubectl create cm dbvar --from=vars
+
+kubectl create deploy newdb2 --image=mariadb
+
+kubectl set env deploy newdb2 --from-env-file=configmaps/dbvar  --prefix=MYSQL_ --it will pass the env via file
+
+kubectl get cm --to list the configmaps
+
 kubectl create configmap app-config --from-literal=key=value
+
 kubectl get configmap
+
 kubectl describe configmap app-config
 ```
 
 ### Secret
 
 ```bash
+
 kubectl create secret generic app-secret --from-literal=password=1234
+
+kubectl create secret generic app-secret --from-env-file=var
+
 kubectl get secrets
+
+kubectl get secrets app-secret -o yaml
+
+example output
+
+----
+[root@kops ~]# kubectl get secret my-secret2 -o yaml
+apiVersion: v1
+data:
+  ROOT_PASSWORD: cm9vdDEyMzQ=
+  ROOT_USER: cm9vdA==
+kind: Secret
+metadata:
+  creationTimestamp: "2026-02-28T21:43:49Z"
+  name: my-secret2
+  namespace: default
+  resourceVersion: "34178"
+  uid: a7359d50-013c-46c9-9821-ad2f54ecf989
+type: Opaque
+----
+echo -n "cm9vdDEyMzQ=" | base64 --decode
+output
+
+root1234[root@kops ~]# 
+
 kubectl describe secret app-secret
+
 ```
 
 to delete the cluster in the KOPS
