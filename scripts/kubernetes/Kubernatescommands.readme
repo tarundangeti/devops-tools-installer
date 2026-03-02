@@ -487,6 +487,7 @@ kubectl explain deployment.spec.template
 
 ```bash
 kubectl get events
+kubectl logs podname
 ```
 
 Sort by time:
@@ -501,6 +502,12 @@ Check resource usage (Metrics Server required):
 kubectl top nodes
 kubectl top pods
 ```
+
+to list the ingress 
+
+kubectl get ing
+kubectl describe ing ingressname
+kubectl det ing -o wide
 
 ---
 
