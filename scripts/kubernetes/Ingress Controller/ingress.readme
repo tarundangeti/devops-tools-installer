@@ -1,0 +1,171 @@
+# Kubernetes Ingress Setup with NGINX and Apache
+
+This guide walks through deploying NGINX and Apache HTTPD applications in Kubernetes and exposing them via an Ingress resource using the NGINX Ingress Controller.
+
+---
+
+## Prerequisites
+- A running Kubernetes cluster
+- `kubectl` configured to access your cluster
+- Internet access to pull container images
+
+---
+
+## Step 1: Install NGINX Ingress Controller
+
+Apply the official NGINX Ingress Controller manifest:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+
+
+This will create the ingress-nginx namespace, controller pods, and a LoadBalancer service.
+
+Step 2: Create Application Manifests
+nginx.yml
+Create a file named nginx.yml:
+
+yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 80
+apache.yml
+Create a file named apache.yml:
+
+yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpd
+  template:
+    metadata:
+      labels:
+        app: httpd
+    spec:
+      containers:
+        - name: httpd
+          image: httpd:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpd
+spec:
+  selector:
+    app: httpd
+  ports:
+    - port: 80
+      targetPort: 80
+ingress.yml
+Create a file named ingress.yml:
+
+yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /nginx/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80
+          - path: /httpd/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: httpd
+                port:
+                  number: 80
+          - path: /?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80
+Step 3: Apply the Manifests
+Run the following commands one by one:
+
+bash
+kubectl create -f nginx.yml
+kubectl create -f apache.yml
+kubectl create -f ingress.yml
+Step 4: Verify Ingress
+Check the Ingress resource:
+
+bash
+kubectl get ing
+Within ~2 minutes, the ADDRESS field should show a LoadBalancer IP or hostname.
+
+Step 5: Test Access
+Open the LoadBalancer address in your browser → defaults to NGINX.
+
+Change the path to /httpd → redirects to Apache HTTPD.
+
+
+
+
+
+
+create vi and paste nginx.yml
+create vi and paste apache.yml
+create vi and paste ingress.yml
+
+copy the below command and execute
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+
+now create the deployment using below one by one
+
+kubectl create -f nginx.yml
+kubectl create -f apache.yml
+kubectl create -f ingress.yml
+
+kubectl get ing 
+
+after some time in 2 mins you will get the load balancer in address and copy and paste it over browser it will default gets in to nginx and change the path to httpd it will redirect to apache
