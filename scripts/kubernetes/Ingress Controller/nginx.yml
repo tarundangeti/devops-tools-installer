@@ -1,8 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata: 
+metadata:
   name: nginx
-spec: 
+  labels:
+    app: nginx
+spec:
   replicas: 1
   selector:
     matchLabels:
@@ -16,19 +18,18 @@ spec:
         - name: nginxcont
           image: nginx
           ports:
-            - ContainerPort: 80
+            - containerPort: 80
           env:
             - name: TITLE
-              value: "NGINX APP1"
+              value: "NGINX APP 1"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: nginx
 spec:
-  tyep: ClusterIP
+  type: ClusterIP
   ports:
     - port: 80
   selector:
     app: nginx
-    
