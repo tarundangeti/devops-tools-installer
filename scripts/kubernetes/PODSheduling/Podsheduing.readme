@@ -1,3 +1,5 @@
+
+Node Selector
 vi nodeshedduling.yml
 
 copy and paste the nodesheduleing 
@@ -11,3 +13,11 @@ kubectl edit node nodename --to edit the node name
 kubectl create -f nodesheduling.yml
 it wil create the two pods in same node
 
+NodeAffinity
+vi nodeaffinity.yml
+
+copy and paste the nodeaffinity
+:wq!
+
+kubectl create -f nodeaffinity.yml
+first it will check the node which was given in the manifest file has there if there pods will create on that node if not pods will create with out respective to the node name
