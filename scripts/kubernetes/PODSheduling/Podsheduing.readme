@@ -14,6 +14,14 @@ kubectl create -f nodesheduling.yml
 it wil create the two pods in same node
 
 NodeAffinity
+operators
+
+In: The node must have a label with a key that matches the specified key, and the label's value must be one of the values in the provided list.
+NotIn: The node must have a label with a key that matches the specified key, and the label's value must not be one of the values in the provided list. This is often used for creating anti-affinity rules, to ensure pods do not land on certain nodes.
+Exists: The node must have a label with the specified key, regardless of its value. This is useful for checking the mere presence of a label, such as a hardware feature like a GPU.
+DoesNotExist: The node must not have a label with the specified key.
+Gt (Greater than): The node must have a label with a key that matches the specified key, and the label's value must be a numeric value greater than the specified value.
+Lt (Less than): The node must have a label with a key that matches the specified key, and the label's value must be a numeric value less than the specified value
 vi nodeaffinity.yml
 
 copy and paste the nodeaffinity
