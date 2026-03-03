@@ -1,0 +1,13 @@
+vi nodeshedduling.yml
+
+copy and paste the nodesheduleing 
+:wq!
+
+now edit the node by using below
+kubectl get nodes --to get the node names
+kubectl edit node nodename --to edit the node name
+  add node-name: ib-bank
+:wq!
+kubectl create -f nodesheduling.yml
+it wil create the two pods in same node
+
