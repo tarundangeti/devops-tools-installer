@@ -1,4 +1,4 @@
-apiversion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ib-deployment
@@ -7,7 +7,7 @@ metadata:
 spec:
   replicas: 2
   selector:
-    labels:
+    matchLabels:
       app: bank
   template:
     metadata:
