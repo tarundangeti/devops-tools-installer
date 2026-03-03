@@ -71,3 +71,5 @@ namespace: default -- give name space which you are able to run the deply
 
 click on create --it will create the application with th loadbalancer to get the loadbalancer (kubectl get svc ) under your service you will able to see load balancer
 
+if we change the image in the deploy.yml in the project to internetbankingimg it will automatically redeploy the changes after the commt of image change
+
