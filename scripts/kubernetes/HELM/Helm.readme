@@ -1,0 +1,50 @@
+HELM:
+
+in k8s helm is a package manager to install packages
+
+it is used to install appliations on clusters
+we can install and deploy applications by using helm
+it manages k8s resources package through charts
+charts is a collection of files organized on a directory structure
+chart is collection of minifest files
+a running instalnce of a chart with specific config is called a release
+the helm cleient and library is written in the go programming language
+the library uses the kubernetes client library to cmmunicate with kubernetes
+
+Architecture:
+1. HELM REPOSITORY: it has all helm repos which is publically available
+2. HELM CLIENT: Downloads helm charts from helm repos.
+3. API server: download helm charts will be executed on cluster with api server.
+
+Install HELM
+---------------
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+helm version
+---------------
+
+instal AGROCD using HEL
+----------------------
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+----------------------
+
+kubectl create namespace argocd
+
+helm install argocd argo/argo-cd --namespace argocd
+
+kubectl get all -n argocd
+
+ARGOCD EXPOSE SERVER:
+kubectl patch svc argocd-server -n argocd -p '{"spec":{"type": "LoadBalancer"}}' 
+or 
+yum install jq -y --jquery 
+exectute command to get load balancer kubectl get svc argocd-server -n argocd -o jason | jq --raw-output .status.loadBalancer.ingress[0].hostnamme
+
+open load balancer 
+
+execute the belo command to get the password
+
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
