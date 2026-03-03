@@ -1,31 +1,107 @@
+Kubernetes Node Scheduling
+1️⃣ Node Selector
 
-Node Selector
-vi nodeshedduling.yml
+Node Selector is the simplest way to schedule a pod on a specific node using labels.
 
-copy and paste the nodesheduleing 
+Step 1: Create the Manifest File
+vi nodescheduling.yml
+
+Paste your NodeSelector YAML configuration and save:
+
 :wq!
+Step 2: Check Node Names
+kubectl get nodes
+Step 3: Add Label to the Node
+kubectl edit node <node-name>
 
-now edit the node by using below
-kubectl get nodes --to get the node names
-kubectl edit node nodename --to edit the node name
-  add node-name: ib-bank
+Under metadata.labels, add:
+
+node-name: ib-bank
+
+Save and exit:
+
 :wq!
-kubectl create -f nodesheduling.yml
-it wil create the two pods in same node
+Step 4: Create the Pod
+kubectl create -f nodescheduling.yml
 
-NodeAffinity
-operators
+✅ Result:
+The pods will be scheduled only on the node that has the matching label (node-name: ib-bank).
 
-In: The node must have a label with a key that matches the specified key, and the label's value must be one of the values in the provided list.
-NotIn: The node must have a label with a key that matches the specified key, and the label's value must not be one of the values in the provided list. This is often used for creating anti-affinity rules, to ensure pods do not land on certain nodes.
-Exists: The node must have a label with the specified key, regardless of its value. This is useful for checking the mere presence of a label, such as a hardware feature like a GPU.
-DoesNotExist: The node must not have a label with the specified key.
-Gt (Greater than): The node must have a label with a key that matches the specified key, and the label's value must be a numeric value greater than the specified value.
-Lt (Less than): The node must have a label with a key that matches the specified key, and the label's value must be a numeric value less than the specified value
+2️⃣ Node Affinity
+
+Node Affinity is an advanced version of Node Selector. It provides more flexible scheduling rules using operators.
+
+Operators in Node Affinity
+
+In
+The node must have the specified label key, and the value must match one of the values in the list.
+
+NotIn
+The node must have the specified label key, and the value must NOT match the values in the list.
+
+Exists
+The node must have the specified label key (value does not matter).
+
+DoesNotExist
+The node must NOT have the specified label key.
+
+Gt (Greater than)
+The label value must be numerically greater than the specified value.
+
+Lt (Less than)
+The label value must be numerically less than the specified value.
+
+Step 1: Create Node Affinity Manifest
 vi nodeaffinity.yml
 
-copy and paste the nodeaffinity
-:wq!
+Paste your NodeAffinity YAML and save:
 
+:wq!
+Step 2: Create the Pod
 kubectl create -f nodeaffinity.yml
-first it will check the node which was given in the manifest file has there if there pods will create on that node if not pods will create with out respective to the node name
+Behavior:
+
+If the specified node label exists → Pod will be scheduled on that node.
+
+If using requiredDuringSchedulingIgnoredDuringExecution and the label does NOT match → Pod will NOT be scheduled.
+
+If using preferredDuringSchedulingIgnoredDuringExecution and the label does NOT match → Pod may still be scheduled on another node.
+
+3️⃣ Taints and Tolerations
+
+Taints and Tolerations control which pods can be scheduled on specific nodes.
+
+Taints are applied to nodes to repel pods.
+
+Tolerations are applied to pods to allow them to run on tainted nodes.
+
+This is commonly used for:
+
+GPU nodes
+
+High-memory nodes
+
+Dedicated workloads
+
+Step 1: Apply Taint to Node
+kubectl taint nodes <node-name> hardware=gpu:NoSchedule
+
+This means:
+
+Pods without a matching toleration will NOT be scheduled on this node.
+
+Step 2: Create Toleration Manifest
+vi taints.yml
+
+Paste your toleration YAML and save:
+
+:wq!
+Step 3: Create the Pod
+kubectl create -f taints.yml
+Important Notes
+
+Toleration does NOT guarantee that the pod will run on the tainted node.
+
+It only allows the pod to be scheduled there.
+
+The scheduler still decides placement based on resources and other rules.
