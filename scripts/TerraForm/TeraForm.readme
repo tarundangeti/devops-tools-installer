@@ -74,5 +74,41 @@ region = "ap-south-1" ---argument
 
 teraform.tfstate ---statefile terraform statefile is main which conatins actual state of the aws resource 
 
+vi main.tf
+
+provider "aws" {
+
+region= "ap-south-1"
+
+}
+
+indentation is not there in teeraform
+
+teraform fmt ---to formate the spaces
+
+in order to run the teeraform we need to know ivpad
+
+
+teraform init
+teraform validate
+teraform plan
+teraform apply
+teraform destory --auto-approve
+
+terraform first will check for the lock file which contains version inforamtion
+
+terraform is case sensitve
+
+terraform init
+
+
+resource "aws_instance" "myinstance" {
+ami = "
+instance_type= "t2.micro"
+
+}
+
+
+
 
 
