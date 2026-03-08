@@ -1,1 +1,78 @@
+--------TerraForm-----------
+TerraForm is an open source infrastructure as code (IAC) tool developed by HashiCrop.
+
+it allow the users to define and provision infrastructure resources in a consistent, 
+repeatable manner using a high level configuration language known as Hashicrop Configuration Lanaguage(HCL).
+
+it was free and opensource tool but now it is not opensource (check in google is an forked version of teraform).
+
+year= 2014
+developed in= Go lang
+who= mitchel hashimoto
+owned= HashiCrop
+
+alertatives for teeraform:
+
+PULUMI
+ANSIBLE  -it is an configuration management tool, TF will create infrastructure
+CHEF
+PUPPET
+OpenTofu
+
+TF vs ANSIBLE
+
+TF will create the infrastructure and this servers are orchestrated/configured by Ansible
+
+Terraform Structure:
+
+mainly most of the people use teeraform by 3 files
+
+main.tf ----contains all providers, resources and data sources
+varables.tf ----contains all defiend varables
+output.tf ----contains all output resources
+
+the issue structure is the most logic is stored in the single main.tf file therefore
+becomes pretty complex and long.
+
+Terraform, howeve, does not mandate this structure, it only requires a directory of terraform files.
+filenames do not matter to terraform. to make it simple we prefer the following structure.
+
+projectname/
+  |
+  | -- provider. tf - Plugin to connect to Cloud, search in google, TF providers --> AWS --> Use provider
+  | -- version.tf - Sets required Terraform and provider versions.
+  | -- backend. tf - this file is used to configure the backend, which determines how and where Terraform stores its state data.
+  | -- main.tf - Contains the core resource definitions
+  | -- variables.tf - Declares input variables.
+  | -- terraform. tfvars - Assigns values to variables
+  | -- outputs.tf
+
+
+provider. tf: contains the terraform block and provider block (AWS, Azure etc)
+data.tf: contains all data sources 
+variables.tf: contains all defined 
+variables_locals.tf: contains all local variables 
+output.tf: contains all output resources
+
+
+
+https://registry.terraform.io/providers/hashicorp/aws/latest --to check the latest version of AWS terraform
+
+terraform {
+  required_providers  --version block{
+    aws = {
+      source = "hashicorp/aws"
+      version = "6.35.0"
+    }
+  }
+}
+
+provider -- provider block "aws" --label/resource_type {
+  # Configuration options
+region = "ap-south-1" ---argument
+}
+
+teraform.tfstate ---statefile terraform statefile is main which conatins actual state of the aws resource 
+
+
 
