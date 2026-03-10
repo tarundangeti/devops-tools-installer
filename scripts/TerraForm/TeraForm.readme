@@ -159,4 +159,5 @@ taints
 if we want to relauch the state of the terraform resource with any changes to its confiurations then we use taints
 
 terraform taint aws_instance.myinstance
+terraform untaint aws_instance.myinstance -- to untaint the instance
 
