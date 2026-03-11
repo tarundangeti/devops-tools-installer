@@ -161,3 +161,7 @@ if we want to relauch the state of the terraform resource with any changes to it
 terraform taint aws_instance.myinstance
 terraform untaint aws_instance.myinstance -- to untaint the instance
 
+----workspace -----
+
+terraform workspace new dev --- it will create dev named workspace and by default enters in to the dev workspace
+terraform workspace select default ----it will select and enters in to the existing workspace default
