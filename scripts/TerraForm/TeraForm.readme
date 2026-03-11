@@ -84,7 +84,7 @@ region= "ap-south-1"
 
 indentation is not there in teeraform
 
-teraform fmt ---to formate the spaces
+terraform fmt ---to formate the spaces
 
 in order to run the teeraform we need to know ivpad
 
@@ -95,8 +95,8 @@ teraform plan
 teraform apply --auto-approve
 teraform destory --auto-approve
 terraform state list --to list the states in the teraform
-teraform destory --auto-approve -target= aws_instance.myinstance[0]  --to terminate one machine
-terraform state show aws_instance.myinstance[0]  --to get more information about this istace machine
+teraform destroy --auto-approve -target= aws_instance.myinstance[0]  --to terminate one machine
+terraform state show aws_instance.myinstance[0]  --to get more information about this instace machine
 
 terraform first will check for the lock file which contains version inforamtion
 
