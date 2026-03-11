@@ -14,9 +14,9 @@ provider "aws" {
 }
 locals {
 
-dev = "development"
-test = "testing"
-prod = "production"
+  dev  = "development"
+  test = "testing"
+  prod = "production"
 
 }
 variable "ins_name" {
@@ -54,6 +54,12 @@ resource "aws_instance" "my_instance" {
     Name = "${local.dev}-${var.ins_name}"
 
   }
+}
+
+resource "aws_s3_bucket" "mybucket" {
+
+  bucket = "${terraform.workspace}-${local.dev}-devenvironment-tarun2"
+
 }
 
 output "instance_name" {
