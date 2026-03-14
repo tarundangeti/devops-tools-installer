@@ -227,6 +227,8 @@ bucket	S3 bucket name
 key	Path where tfstate is stored
 region	AWS region
 
+if we made any changes to the main.tf and that needs to sync with remote s3 statefile than we need to perform teraform init
+
 The state file will be stored like:
 
 s3://tarun-terraform-tfstate-bucket/dev/terraform.tfstate
@@ -252,3 +254,11 @@ resource "aws_instance" "myinstance" {
     Name = "terraform-server"
   }
 }
+
+teraform state list ----to list the all resources
+example: instance1,instance2
+terraform state rm instance1 ---to untrack the instance1 we will use this command 
+terraform state import instance1 instance-id --to again track the instance in the terraform
+
+-----------terraformer--------------
+terraformer is used to import builk number of imports in the resources.
