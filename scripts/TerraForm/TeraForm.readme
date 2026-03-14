@@ -165,3 +165,90 @@ terraform untaint aws_instance.myinstance -- to untaint the instance
 
 terraform workspace new dev --- it will create dev named workspace and by default enters in to the dev workspace
 terraform workspace select default ----it will select and enters in to the existing workspace default
+
+To store the Terraform state file remotely, we usually create an S3 bucket and configure Terraform backend to store the tfstate file there. This is a common DevOps best practice because the state file will be shared, secure, and versioned.
+
+I'll show you:
+
+1️⃣ Terraform code to create S3 bucket
+2️⃣ Configure S3 backend for tfstate
+3️⃣ Step-by-step execution
+
+1️⃣ Terraform Code to Create S3 Bucket
+provider "aws" {
+  region = "ap-south-1"
+}
+
+# Create S3 bucket for Terraform state
+resource "aws_s3_bucket" "tfstate_bucket" {
+  bucket = "tarun-terraform-tfstate-bucket"
+
+  tags = {
+    Name = "terraform-state-bucket"
+  }
+}
+
+# Enable versioning (recommended)
+resource "aws_s3_bucket_versioning" "versioning" {
+  bucket = aws_s3_bucket.tfstate_bucket.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+What this does
+
+Creates an S3 bucket
+
+Enables versioning
+
+Stores multiple versions of the tfstate file
+
+Versioning helps recover the state file if something goes wrong.
+
+2️⃣ Configure Terraform Backend
+
+Now configure Terraform to store tfstate in S3.
+
+Add this block:
+
+terraform {
+  backend "s3" {
+    bucket = "tarun-terraform-tfstate-bucket"
+    key    = "dev/terraform.tfstate"
+    region = "ap-south-1"
+  }
+}
+
+Explanation
+Parameter	Meaning
+bucket	S3 bucket name
+key	Path where tfstate is stored
+region	AWS region
+
+The state file will be stored like:
+
+s3://tarun-terraform-tfstate-bucket/dev/terraform.tfstate
+
+3️ Complete Example Code
+terraform {
+  backend "s3" {
+    bucket = "tarun-terraform-tfstate-bucket"
+    key    = "dev/terraform.tfstate"
+    region = "ap-south-1"
+  }
+}
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_instance" "myinstance" {
+  ami           = "ami-0f58b397bc5c1f2e8"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "terraform-server"
+  }
+}
