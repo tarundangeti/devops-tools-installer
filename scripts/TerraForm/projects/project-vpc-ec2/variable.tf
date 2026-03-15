@@ -1,24 +1,43 @@
-variable "instance_first_name" {
-  description = "Name of the first EC2 instance"
-  type        = string
-}
-
-variable "instance_second_name" {
-  description = "Name of the second EC2 instance"
-  type        = string
-}
-
 variable "instance_type" {
-  description = "EC2 instance type"
+  description = "this is deafult instance type for free tier account"
   type        = string
+  default     = ""
 }
 
 variable "ami" {
-  description = "AMI ID for EC2 instance"
+  description = "this is ubuntu latest image for this project"
   type        = string
+  default     = ""
 }
 
-variable "key_name" {
-  description = "AWS EC2 key pair name"
+variable "instance_first_name" {
+  description = "this is first instance name"
   type        = string
+  default     = ""
+}
+
+variable "instance_second_name" {
+  description = "this is second instance name"
+  type        = string
+  default     = ""
+}
+
+
+variable "vpc_cidr" {
+  description = "this is vpc cidr"
+  type        = string
+  default     = ""
+}
+
+variable "subnet1_cidr" {
+  description = "this is vpc subnet cidr"
+  type        = string
+  default     = ""
+}
+
+variable "subnet2_cidr" {
+  description = "this is vpc subnet cidr"
+  type        = string
+  default     = ""
+
 }
