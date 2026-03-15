@@ -1,0 +1,5 @@
+instance_first_name  = "my-web-1st-server"
+instance_second_name = "my-web-2nd-server"
+instance_type        = "t2.micro"
+ami                  = "ami-06c643a49c853da56"
+key_name             = "tarunpem5/02/2025"
