@@ -260,5 +260,7 @@ example: instance1,instance2
 terraform state rm instance1 ---to untrack the instance1 we will use this command 
 terraform state import instance1 instance-id --to again track the instance in the terraform
 
+statelock ---- if two persons are trying to modify the state file at time only one person able to modify the state file with help of dynamo DB
+
 -----------terraformer--------------
 terraformer is used to import builk number of imports in the resources.
