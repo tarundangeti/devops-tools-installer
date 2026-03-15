@@ -1,5 +1,7 @@
+instance_type        = "t2.micro"
+ami                  = "ami-0ff91eb5c6fe7cc86"
 instance_first_name  = "my-web-1st-server"
 instance_second_name = "my-web-2nd-server"
-instance_type        = "t2.micro"
-ami                  = "ami-0ff91eb5c6fe7cc86" # latest ubuntu image
-key_name             = "tarunpem5/02/2025"
+vpc_cidr             = "192.168.0.0/16"
+subnet1_cidr         = "192.168.1.0/24"
+subnet2_cidr         = "192.168.2.0/24"
