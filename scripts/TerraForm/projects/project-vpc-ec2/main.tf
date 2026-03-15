@@ -1,34 +1,26 @@
-provider "aws" {
-  region = "ap-south-1"
-}
-
-# VPC
 resource "aws_vpc" "myvpc" {
-  cidr_block = "192.168.0.0/16"
+  cidr_block = var.vpc_cidr
 }
 
-# Subnets
-resource "aws_subnet" "subnet1" {
+resource "aws_subnet" "my_1st_subnet" {
   vpc_id                  = aws_vpc.myvpc.id
-  cidr_block              = "192.168.1.0/24"
+  cidr_block              = var.subnet1_cidr
   availability_zone       = "ap-south-1a"
   map_public_ip_on_launch = true
 }
 
-resource "aws_subnet" "subnet2" {
+resource "aws_subnet" "my_2nd_subnet" {
   vpc_id                  = aws_vpc.myvpc.id
-  cidr_block              = "192.168.2.0/24"
+  cidr_block              = var.subnet2_cidr
   availability_zone       = "ap-south-1b"
   map_public_ip_on_launch = true
 }
 
-# Internet Gateway
 resource "aws_internet_gateway" "my_igw" {
   vpc_id = aws_vpc.myvpc.id
 }
 
-# Route Table
-resource "aws_route_table" "my_route_table" {
+resource "aws_route_table" "my_route_tb" {
   vpc_id = aws_vpc.myvpc.id
 
   route {
@@ -37,95 +29,82 @@ resource "aws_route_table" "my_route_table" {
   }
 }
 
-# Route Table Association
-resource "aws_route_table_association" "rta1" {
-  subnet_id      = aws_subnet.subnet1.id
-  route_table_id = aws_route_table.my_route_table.id
+resource "aws_route_table_association" "my_rta1" {
+  subnet_id      = aws_subnet.my_1st_subnet.id
+  route_table_id = aws_route_table.my_route_tb.id
 }
 
-resource "aws_route_table_association" "rta2" {
-  subnet_id      = aws_subnet.subnet2.id
-  route_table_id = aws_route_table.my_route_table.id
+resource "aws_route_table_association" "my_rta2" {
+  subnet_id      = aws_subnet.my_2nd_subnet.id
+  route_table_id = aws_route_table.my_route_tb.id
 }
 
-# Security Group
-resource "aws_security_group" "my_security_group" {
-  name   = "my-security-group"
+resource "aws_security_group" "my_sg" {
+  name   = "my_sg"
   vpc_id = aws_vpc.myvpc.id
-
   ingress {
-    description = "HTTP access"
-    from_port   = 80
-    to_port     = 80
+    description = "this from vpc to server via HTTP"
+    from_port   = "80"
+    to_port     = "80"
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   ingress {
-    description = "SSH access"
-    from_port   = 22
-    to_port     = 22
+    description = "this is to enable SSH to server"
+    from_port   = "22"
+    to_port     = "22"
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   egress {
-    from_port   = 0
-    to_port     = 0
+    from_port   = "0"
+    to_port     = "0"
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   tags = {
-    Name = "my-security-group"
+    Name = "my_sg"
   }
 }
 
-# S3 Bucket
-resource "aws_s3_bucket" "example" {
-  bucket = "terraform-s3-test-reya-project"
-}
-
-# EC2 Instances
-resource "aws_instance" "server1" {
+resource "aws_instance" "my_first_instance" {
   instance_type          = var.instance_type
   ami                    = var.ami
-  subnet_id              = aws_subnet.subnet1.id
-  vpc_security_group_ids = [aws_security_group.my_security_group.id]
+  vpc_security_group_ids = [aws_security_group.my_sg.id]
+  subnet_id              = aws_subnet.my_1st_subnet.id
   user_data              = base64encode(file("userdata.sh"))
-
   tags = {
-    Name = "my-1st-server"
+    Name = var.instance_first_name
   }
 }
 
-resource "aws_instance" "server2" {
+
+resource "aws_instance" "my_second_instance" {
   instance_type          = var.instance_type
   ami                    = var.ami
-  subnet_id              = aws_subnet.subnet2.id
-  vpc_security_group_ids = [aws_security_group.my_security_group.id]
-  user_data              = base64encode(file("userdata.sh"))
-
+  vpc_security_group_ids = [aws_security_group.my_sg.id]
+  subnet_id              = aws_subnet.my_2nd_subnet.id
+  user_data              = base64encode(file("userdata1.sh"))
   tags = {
-    Name = "my-2nd-server"
+    Name = var.instance_second_name
   }
 }
 
-# Application Load Balancer
+#create alb
 resource "aws_lb" "myalb" {
-  name               = "my-alb"
+  name               = "myalb"
   internal           = false
   load_balancer_type = "application"
 
-  security_groups = [aws_security_group.my_security_group.id]
-  subnets         = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
+  security_groups = [aws_security_group.my_sg.id]
+  subnets         = [aws_subnet.my_1st_subnet.id, aws_subnet.my_2nd_subnet.id]
 
   tags = {
-    Name = "WEB-LB"
+    Name = "web"
   }
 }
 
-# Target Group
+# Creating Load Balancer
 resource "aws_lb_target_group" "tg" {
   name     = "myTG"
   port     = 80
@@ -138,20 +117,19 @@ resource "aws_lb_target_group" "tg" {
   }
 }
 
-# Attach Instances
+# Attaching Load Balancer
 resource "aws_lb_target_group_attachment" "attach1" {
   target_group_arn = aws_lb_target_group.tg.arn
-  target_id        = aws_instance.server1.id
+  target_id        = aws_instance.my_first_instance.id
   port             = 80
 }
 
 resource "aws_lb_target_group_attachment" "attach2" {
   target_group_arn = aws_lb_target_group.tg.arn
-  target_id        = aws_instance.server2.id
+  target_id        = aws_instance.my_second_instance.id
   port             = 80
 }
 
-# Listener
 resource "aws_lb_listener" "listener" {
   load_balancer_arn = aws_lb.myalb.arn
   port              = 80
