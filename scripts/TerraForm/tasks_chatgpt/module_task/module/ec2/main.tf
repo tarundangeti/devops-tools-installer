@@ -5,6 +5,6 @@ resource "aws_instance" "tf_instance" {
   vpc_security_group_ids = [var.sg_id]
   key_name = var.key_name
   tags = {
-    Name = var.sg_name
+    Name = var.instance_name
   }
 }
