@@ -1,0 +1,18 @@
+# inorder to create the state file in the remote aws s3 first we need to create the aws s3 bucket 
+  with an unique name and enable the version and create the dynamodb with table name as unique an partition key as LockID
+  by this above we can achive only one person at a time can modify the changes in to the terraform setup by mulitipule person
+  bucket = "tf-dev-remotestatefile-tarundangeti"
+  dynamodb = "tf-dynamodb-table"
+
+  vi backend.tf
+  -----
+  terraform {
+    backend "s3" {
+      bucket = "tf-dev-remotestatefile-tarundangeti"
+      key = "prod/terraform.tfstate"
+      encrypt = true
+      dynamodb_table = "tf-dynamodb-table"
+      region = "ap-south-1"
+    }
+  }
+  ------
